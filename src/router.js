@@ -18,51 +18,60 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: { gradientBg: false }
   },
 
   {
     path: '/register',
     name: 'Register',
     component: Register,
+    meta: { gradientBg: false }
   },
 
   {
     path: '/login',
     name: 'Login',
     component: Login,
+    meta: { gradientBg: false }
   },
 
   {
     path: '/home',
     name: 'AuthHome',
     component: AuthHome,
+    meta: { gradientBg: true }
   },
 
   {
     path: '/test/:id',
     name: 'Test',
     component: Test,
+    meta: { gradientBg: true }
   },
 
   {
     path: '/createTest',
     name: 'CreateTest',
     component: CreateTest,
+    meta: { gradientBg: true }
   },
 
   {
     path: '/checkTest/:id',
     name: 'LoockTest',
     component: LoockTest,
+    meta: { gradientBg: true }
   },
 
   {
     path: '/editProfile',
     name: 'EditProfile',
     component: EditProfile,
+    meta: { gradientBg: true }
   }
 
 ]
+
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -74,6 +83,7 @@ const router = createRouter({
 // Перевірка авторизації перед кожним переходом
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("tokenAuthTeacher")
+  const userId = localStorage.getItem("usetId")
 
   // маршрути, які можна відвідувати без авторизації
   const publicPages = ['/register', '/login', '/', '/test/:id']
@@ -81,7 +91,7 @@ router.beforeEach((to, from, next) => {
   // якщо маршрут не публічний
   const authRequired = !publicPages.includes(to.path)
 
-  if (authRequired && !token ) {
+  if (authRequired && !token && !userId) {
     alert("Спочатку авторизуйтеся")
     return next('/register') // якщо не авторизований 
   }

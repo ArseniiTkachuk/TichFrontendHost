@@ -59,7 +59,7 @@ export default {
     props: { ex: { type: Object, required: true } },
     data() {
         return {
-            BackURL: "https://test-bg-prj-for-math.onrender.com",
+            BackURL: import.meta.env.VITE_BACK_URL,
             left: this.ex.pairs.left,
             right: this.ex.pairs.right,
             selectedLeftSlug: null,
@@ -73,7 +73,7 @@ export default {
     methods: {
         selectLeft(obj) { this.selectedLeftSlug = obj.slug; },
         selectRight(obj) {
-            if (!this.selectedLeftSlug) { this.$emit('msg', 'Спочатку оберіть елемент з лівої колонки!'); return; }
+            if (!this.selectedLeftSlug) { this.$root.showToast('Спочатку оберіть елемент з лівої колонки!', 'error'); return; }
             this.pairs.push([this.selectedLeftSlug, obj.slug]);
             this.selectedLeftSlug = null;
             if (this.pairs.length === this.left.length) {
@@ -152,12 +152,33 @@ export default {
     display: inline-block;
 }
 
+/* Картинки в колонках */
 .item img {
-    width: 100%;
     max-width: 150px;
+    max-height: 150px;
+    width: auto;
     height: auto;
-    border-radius: 6px;
+    border-radius: 8px;
 }
+
+/* Картинки в обраних парах */
+.pair-item img {
+    max-width: 150px;
+    max-height: 150px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+
+    .item img,
+    .pair-item img {
+        max-width: 120px;
+        max-height: 120px;
+    }
+}
+
 
 /* Вибрані пари */
 .selected-pairs {

@@ -19,7 +19,7 @@
                 :currentId="currentIndex" @answered="saveAnswer" />
 
             <pairs v-else-if="currentEx.type === 'pair'" :ex="currentEx" @answered="saveAnswer"
-                @ISAnswer="isanswer = $event" @msg="showMsg($event)" :key="currentEx.slug" />
+                @ISAnswer="isanswer = $event" :key="currentEx.slug" />
 
             <enters v-else-if="currentEx.type === 'enter'" :ex="currentEx" @answered="saveAnswer" :key="currentIndex" />
 
@@ -69,16 +69,15 @@
         </div>
     </div>
 
-    <div v-if="show" class="copied-toast">{{ text }}</div>
 </template>
 <script>
 import axios from 'axios';
 
 import answers from '@/components/passageTest/answers.vue';
 import pairs from '@/components/passageTest/pairs.vue';
-import enters from '@/components/passageTest/enters.vue'; 
-const BackURL = "https://test-bg-prj-for-math.onrender.com";
+import enters from '@/components/passageTest/enters.vue';
 
+const BACK_URL = import.meta.env.VITE_BACK_URL;
 
 export default {
     components: {
@@ -104,8 +103,6 @@ export default {
 
             test: {},
 
-            text: '',
-            show: false,
         }
 
     },
@@ -136,12 +133,6 @@ export default {
 
     methods: {
 
-        showMsg(txt) {
-            this.text = txt
-            this.show = true;
-            setTimeout(() => (this.show = false), 3000)
-        },
-
         goBack() {
             this.$router.back();
             // або: this.$router.push('/')
@@ -151,6 +142,7 @@ export default {
 
             if (this.fullName.length <= 3) {
                 this.error = 'Імя має складатися мінімум з 3 символів'
+                this.$root.showToast("Помилка!", "error")
             } else {
                 this.isName = true
             }
@@ -160,12 +152,13 @@ export default {
         async fetchTest() {
             try {
                 this.testId = this.$route.params.id;
-                const res = await axios.get(`${BackURL}/test/${this.testId}`);
+                const res = await axios.get(`${BACK_URL}/test/${this.testId}`);
                 console.log(res.data); // <-- перевір, що реально повертає бекенд
                 this.test = res.data;
                 this.correctTestCode = true;
             } catch (err) {
                 console.error(err);
+                this.$root.showToast("Помилка!", "error")
                 this.correctTestCode = false;
             }
         },
@@ -183,7 +176,7 @@ export default {
                 const answersArray = Object.values(this.userAnswers);
 
                 const res = await axios.post(
-                    `${BackURL}/test/${this.testId}/result`,
+                    `${BACK_URL}/test/${this.testId}/result`,
                     {
                         userAnswers: answersArray,
                         name: this.fullName
@@ -195,7 +188,7 @@ export default {
 
             } catch (err) {
                 console.error(err);
-                alert('Помилка при перевірці тесту');
+                this.$root.showToast("Помилка при перевірці тесту", "error")
             }
         }
 
@@ -214,8 +207,6 @@ export default {
     padding: 0;
     box-sizing: border-box;
 }
-
-
 
 /*  Загальний контейнер тесту  */
 .test-wrapper {
@@ -237,47 +228,6 @@ export default {
     /* Відстань між кнопками */
     margin-top: 20px;
     /* Відступ від нижнього блоку */
-}
-
-
-
-
-/* toast notification */
-.copied-toast {
-    position: fixed;
-    bottom: 10%;
-    right: 0;
-    transform: translateX(-50%);
-    background: #4caf50;
-    color: white;
-    padding: 15px 40px;
-    /* Збільшуємо розмір блоку */
-    border-radius: 20px;
-    /* Більші закруглення */
-    font-size: 20px;
-    /* Збільшуємо текст */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: slideInOut 3s forwards;
-    z-index: 500;
-}
-
-
-@keyframes slideInOut {
-  0% {
-    opacity: 0.5;
-    transform: translateX(-50%) translateY(20px);
-  }
-
-  5%,
-  90% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateX(60px);
-  }
 }
 
 /* ===== MODAL OVERLAY ===== */

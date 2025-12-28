@@ -162,14 +162,13 @@
       </div>
       <button @click="showModal = false" class="btn-close">✖</button>
     </div>
-    <div v-if="copied" class="copied-toast">Скопійовано!</div>
   </div>
 
 </template>
 
 <script>
 import axios from "axios";
-const BackURL = "https://test-bg-prj-for-math.onrender.com";
+const BACK_URL = import.meta.env.VITE_BACK_URL;
 
 export default {
   data() {
@@ -189,7 +188,6 @@ export default {
       showModal: false,
       testCode: "",
       testLink: "",
-      copied: false,
     };
   },
   computed: {
@@ -200,8 +198,8 @@ export default {
   methods: {
     copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        this.copied = true;
-        setTimeout(() => (this.copied = false), 1500);
+        this.$root.showToast('Скопійовано');
+        
       }).catch(err => console.error(err));
     },
     addQuestion() {
@@ -292,19 +290,21 @@ export default {
           }
         });
 
-        const res = await axios.post(`${BackURL}/test`, formData, {
+        const res = await axios.post(`${BACK_URL}/test`, formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem("tokenAuthTeacher")}`, "Content-Type": "multipart/form-data" }
         });
 
-
-
+        this.$root.showToast('Тест створено');
+        this.message = '';
         // Зберігаємо код та посилання
         this.testCode = res.data.id;
-        this.testLink = `${window.location.origin}/test/${res.data.id}`;
+        this.testLink = window.location.origin + this.$router.resolve({ path: `/test/${res.data.id}` }).href
         this.showModal = true;
+        
       } catch (err) {
         console.error("AxiosError", err);
         this.message = "Помилка при створенні тесту: " + (err.response?.data?.message || err.message);
+        this.$root.showToast("Помилка при створенні тесту", "error")
       }
     }
   }
@@ -320,8 +320,6 @@ export default {
   box-sizing: border-box;
   font-family: 'Roboto Slab', serif;
 }
-
-
 
 .test-wrapper {
   background-color: #f5f6f8;
@@ -663,42 +661,5 @@ select:focus {
 .btn-close:hover {
   background: rgba(255, 255, 255, 0.4);
   transform: scale(1.2);
-}
-
-/* toast notification */
-.copied-toast {
-  position: fixed;
-  bottom: 10%;
-  right: 0%;
-  transform: translateX(-50%);
-  background: #4caf50;
-  color: white;
-  padding: 15px 40px;
-  /* Збільшуємо розмір блоку */
-  border-radius: 20px;
-  /* Більші закруглення */
-  font-size: 20px;
-  /* Збільшуємо текст */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  animation: slideInOut 1.5s forwards;
-  z-index: 500;
-}
-
-@keyframes slideInOut {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-  }
-
-  10%,
-  90% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-  }
 }
 </style>

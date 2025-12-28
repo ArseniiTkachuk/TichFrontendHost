@@ -39,8 +39,8 @@
 
 <script>
 import axios from "axios";
-const BackURL = "https://test-bg-prj-for-math.onrender.com";
 
+const BACK_URL = import.meta.env.VITE_BACK_URL;
 
 
 export default {
@@ -60,7 +60,7 @@ export default {
       this.errors = {};
 
       try {
-        const res = await axios.post(`${BackURL}/login`, {
+        const res = await axios.post(`${BACK_URL}/login`, {
           email: this.email,
           password: this.password
         });
@@ -71,6 +71,7 @@ export default {
 
       } catch (err) {
         console.error(err);
+        this.$root.showToast("Помилка!", "error")
 
         if (Array.isArray(err.response?.data)) {
           err.response.data.forEach(e => {
