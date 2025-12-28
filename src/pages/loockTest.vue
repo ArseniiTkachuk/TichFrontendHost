@@ -135,31 +135,6 @@ export default {
 }
 
 
-:global(body) {
-    background: linear-gradient(135deg, #4d0cff, #b000f8, #ff00b3);
-    background-size: 300% 300%;
-    animation: gradientMove 10s ease infinite;
-}
-
-
-/* Анімація градієнта */
-@keyframes gradientMove {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-
-
-
 .test-view-container {
     max-width: 800px;
     margin: 0 auto;
