@@ -131,7 +131,7 @@ export default {
 
                 // Зберігаємо код та посилання
                 this.testCode = testId;
-                this.testLink = this.testLink = window.location.origin + this.$router.resolve({ path: `/test/${testId}` }).href
+                this.testLink =  window.location.origin + window.location.pathname + `/#/test/${testId}`
 
 
             } catch (err) {

@@ -199,7 +199,7 @@ export default {
     copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
         this.$root.showToast('Скопійовано');
-        
+
       }).catch(err => console.error(err));
     },
     addQuestion() {
@@ -298,10 +298,11 @@ export default {
         this.message = '';
         // Зберігаємо код та посилання
         this.testCode = res.data.id;
-        this.testLink = new URL(this.$router.resolve({ path: `/test/${res.data.id}` }).href, window.location.origin).href;
+        this.testLink = window.location.origin + window.location.pathname + `/#/test/${res.data.id}`
+
 
         this.showModal = true;
-        
+
       } catch (err) {
         console.error("AxiosError", err);
         this.message = "Помилка при створенні тесту: " + (err.response?.data?.message || err.message);
