@@ -298,7 +298,8 @@ export default {
         this.message = '';
         // Зберігаємо код та посилання
         this.testCode = res.data.id;
-        this.testLink = window.location.origin + this.$router.resolve({ path: `/test/${res.data.id}` }).href
+        this.testLink = new URL(this.$router.resolve({ path: `/test/${res.data.id}` }).href, window.location.origin).href;
+
         this.showModal = true;
         
       } catch (err) {

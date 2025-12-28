@@ -83,15 +83,13 @@ const router = createRouter({
 // Перевірка авторизації перед кожним переходом
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("tokenAuthTeacher")
-  const userId = localStorage.getItem("usetId")
-
   // маршрути, які можна відвідувати без авторизації
   const publicPages = ['/register', '/login', '/', '/test/:id']
 
   // якщо маршрут не публічний
   const authRequired = !publicPages.includes(to.path)
 
-  if (authRequired && !token && !userId) {
+  if (authRequired && !token ) {
     alert("Спочатку авторизуйтеся")
     return next('/register') // якщо не авторизований 
   }
