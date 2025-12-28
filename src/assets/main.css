@@ -14,7 +14,7 @@ body {
     overflow-x: hidden;
 }
 
-body.gradient-bg {
+:global(body) {
     background: linear-gradient(135deg, #4d0cff, #b000f8, #ff00b3);
     background-size: 300% 300%;
     animation: gradientMove 10s ease infinite;
