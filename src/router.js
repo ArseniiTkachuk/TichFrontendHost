@@ -57,7 +57,7 @@ const routes = [
   },
 
   {
-    path: '/checkTest/:id',
+    path: '/loockTest/:id',
     name: 'LoockTest',
     component: LoockTest,
     meta: { gradientBg: true }
@@ -83,19 +83,17 @@ const router = createRouter({
 // Перевірка авторизації перед кожним переходом
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("tokenAuthTeacher")
-  // маршрути, які можна відвідувати без авторизації
-  const publicPages = ['/register', '/login', '/', '/test/:id']
 
-  // якщо маршрут не публічний
-  const authRequired = !publicPages.includes(to.path)
+  const publicPages = ['Home', 'Register', 'Login', 'Test']
+  const authRequired = !publicPages.includes(to.name)
 
-  if (authRequired && !token ) {
+  if (authRequired && !token) {
     alert("Спочатку авторизуйтеся")
-    return next('/register') // якщо не авторизований 
+    return next({ name: 'Register' })
   }
-
 
   next()
 })
+
 
 export default router

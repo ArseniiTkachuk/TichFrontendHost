@@ -39,7 +39,7 @@
 
       <input v-model="testCode" placeholder="Enter code" class="modal-input">
 
-      <button class="modal-btn" @click="$router.push({ path: `/test/${this.testCode}` });"> Go </button>
+      <button class="modal-btn" @click="$router.push(`/test/${testCode}`)"> Go </button>
 
     </div>
   </div>
@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       enterCode: false,
-      testCode:''
+      testCode: ''
     }
   },
 
