@@ -1,61 +1,30 @@
 <template>
-    <div v-if="test.exercises" class="test-view-container">
+    <main v-if="error" class="error">{{ error }}</main>
+    <div v-else-if="result" class="test-view-container">
+        <!-- HEADER -->
         <nav class="navigation">
             <button @click="$router.back()" class="btn-back">
-
                 <span class="arrow">←</span>
                 <span class="btn-text">Назад</span>
             </button>
-
-            <button class="btn-share" title="Поділитися тестом" @click="showModal = true">
-
-                <span class="icon">🔗</span>
-                <span class="btn-text">Поділитися</span>
-            </button>
-
-
-            <!-- меню -->
-            <div class="menu-wrapper" ref="menuWrapper">
-                <button class="menu-btn" @click.stop="toggleMenu">⋮</button>
-                <div v-if="menuOpen" class="mobile-dropdown">
-                    <button class="btn-results" title="Результати тесту" @click="showResultsModal = true">
-                        <span class="icon">📊</span>
-                        <span>Результати</span>
-                    </button>
-
-                    <button class="btn-edit" title="Редагувати тест" @click="editTest">
-                        <span class="icon">✏️</span>
-                        <span>Редагувати</span>
-                    </button>
-
-                    <button class="btn-delete" title="Видалити тест" @click="showModalRemote = true">
-                        <span class="icon">🗑️</span>
-                        <span>Видалити</span>
-                    </button>
-                </div>
-            </div>
-
-
-
         </nav>
 
         <header class="test-header">
             <div class="header-content">
-                <h1>{{ test.title }}</h1>
+                <h1>Результат учня</h1>
                 <div class="test-stats">
                     <span class="stat-item">
-                        <strong>{{ test.childrens.length }}</strong> проходжень
+                        Учень: <strong>{{ result.name }}</strong>
                     </span>
                     <span class="divider">|</span>
-                    <span class="stat-item">
-                        <strong>{{ test.exercises.length }}</strong> завдань
-                    </span>
+                    <span class="stat-item"><strong>{{ result.score }}</strong> / 100 балів</span>
+                    <span class="divider">|</span>
+                    <span class="stat-item">Виходів з тесту: <strong>{{ result.leaveCount }}</strong></span>
                 </div>
             </div>
         </header>
-
         <main class="exercises-list">
-            <div v-for="(exercise, index) in test.exercises" :key="exercise.slug || index" class="exercise-card">
+            <div v-for="(exercise, index) in result.results" :key="exercise.slug || index" :class="isCorrect(exercise.isCorrect)" class="exercise-card">
                 <div class="exercise-badge">Завдання №{{ index + 1 }}</div>
 
                 <div class="exercise-body">
@@ -66,151 +35,50 @@
             </div>
         </main>
     </div>
-
-    <!-- Модальне вікно Поділитися -->
-    <div v-if="showModal" class="modal-overlay" @click="showModal = false">
-        <div class="modal-content animated-modal" @click.stop>
-            <h2>🔗 Поділитися тестом!</h2>
-            <div class="modal-el">
-                <p><strong>Код тесту:</strong> <span class="code-text">{{ testCode }}</span>
-                    <button @click="copyToClipboard(testCode)" class="btn-copy">📋</button>
-                </p>
-            </div>
-            <div class="modal-el">
-                <strong>Посилання на тест: </strong>
-                <p>
-                    <a :href="testLink" target="_blank">{{ testLink }}</a>
-                    <button @click="copyToClipboard(testLink)" class="btn-copy">📋</button>
-                </p>
-            </div>
-            <button @click="showModal = false" class="btn-close">✖</button>
-        </div>
-    </div>
-
-    <!-- Модальне вікно Видалити -->
-    <div v-if="showModalRemote" class="modal-overlay" @click="showModalRemote = false">
-        <div class="modal-content delete-modal animated-modal" @click.stop>
-            <h2>🗑️ Видалити тест?</h2>
-            <div class="delete-text">
-                <p>Ви впевнені, що хочете видалити цей тест?</p>
-                <p> Цю дію не можна буде відмінити.</p>
-            </div>
-            <div class="delete-buttons">
-                <button @click="deleteTest" class="btn-confirm">🗑️ Видалити</button>
-                <button @click="showModalRemote = false" class="btn-cancel">Скасувати</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальне вікно Результати -->
-    <div v-if="showResultsModal" class="modal-overlay" @click="showResultsModal = false">
-        <div class="modal-content animated-modal" @click.stop>
-            <h2>📊 Результати тесту</h2>
-            <div class="results-list" v-if="test.childrens && test.childrens.length">
-                <div v-for="(child, idx) in test.childrens" :key="idx" class="result-card" @click="$router.push(`/test/${$route.params.id}/result/${child.slug}`)">
-                    <div class="result-left">
-                        <div class="avatar">
-                            {{ child.name.charAt(0).toUpperCase() }}
-                        </div>
-
-                        <div class="user-info">
-                            <strong>{{ child.name }}</strong>
-                            <span class="meta">Виходів: {{ child.leaveCount || 0 }}</span>
-                        </div>
-                    </div>
-
-                    <div class="result-right">
-                        <div class="score">{{ child.scor }}%</div>
-                        <div class="progress">
-                            <div class="progress-bar" :style="{ width: child.scor + '%' }"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-else>
-                <p>Ще ніхто не проходив тест.</p>
-            </div>
-            <button @click="showResultsModal = false" class="btn-close">✖</button>
-        </div>
-    </div>
-
-
-
 </template>
 
 <script>
-import api from '@/services/api'
-import answers from '@/components/loockTest/answers.vue';
-import enters from '@/components/loockTest/enters.vue';
-import pairs from '@/components/loockTest/pairs.vue';
+import api from "@/services/api";
+import answers from "@/components/lockPassageTest/answers.vue";
+import pairs from "@/components/lockPassageTest/pairs.vue";
+import enters from "@/components/lockPassageTest/enters.vue";
 
 export default {
-    components: { answers, enters, pairs },
+    components: {
+        answers,
+        pairs,
+        enters
+    },
+
     data() {
         return {
-            test: {},
-            showModal: false,
-            showModalRemote: false,
-            showResultsModal: false,
-            testCode: "",
-            testLink: "",
-            menuOpen: false,
+            result: null,
+            error: null
         };
     },
     mounted() {
-        this.fetchTest();
-        document.addEventListener('click', this.handleClickOutside);
-    },
-    beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
+        this.fetchResult();
     },
     methods: {
-        editTest() {
-            const testId = this.$route.params.id;
-            this.$router.push({ path: `/editTest/${testId}` });
-        },
-
-        handleClickOutside(event) {
-            const menu = this.$refs.menuWrapper;
-            if (menu && !menu.contains(event.target)) {
-                this.menuOpen = false;
-            }
-        },
-        toggleMenu() {
-            this.menuOpen = !this.menuOpen;
-        },
-        async fetchTest() {
+        async fetchResult() {
             try {
-                const testId = this.$route.params.id;
-                const res = await api.get(`/getOneTest/${testId}`);
-                this.test = res.data.test;
-
-                this.testCode = testId;
-                this.testLink = window.location.origin + window.location.pathname + `#/test/${testId}`;
+                const { id, slug } = this.$route.params;
+                const { data } = await api.get(`/test/${id}/result/${slug}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("tokenAuthTeacher")}` }
+                });
+                this.result = data;
+                console.log(data)
             } catch (err) {
                 console.error(err);
-                this.$root.showToast("Помилка при завантаженні тесту", "error");
+                this.error = err.response?.data?.message || "Помилка при завантаженні";
             }
         },
-        copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                this.$root.showToast('Скопійовано');
-            }).catch(err => {
-                console.error(err);
-                this.$root.showToast('Помилка!', 'error');
-            });
-        },
-        async deleteTest() {
-            try {
-                const testId = this.$route.params.id;
-                await api.delete(`/test/${testId}`);
-                this.$root.showToast('Тест успішно видалено!');
-                this.$router.back();
-            } catch (err) {
-                console.error(err);
-                this.$root.showToast('Помилка при видаленні тесту', 'error');
+        isCorrect(crct){
+            return {
+                correct: crct,
+                noCorrect: !crct
             }
+
         }
     }
 };
@@ -311,8 +179,6 @@ export default {
 
 .icon {
     font-size: 18px;
-    transition: transform 0.3s ease;
-
 }
 
 /* Анімація для іконки share при наведенні */
@@ -430,11 +296,20 @@ export default {
 
 /* Картки завдань */
 .exercise-card {
-    background: white;
     border-radius: 20px;
     padding: 25px;
     margin-bottom: 25px;
-    border: 1px solid #eaeaea;
+}
+
+.exercise-card.correct {
+    background: rgb(225, 245, 226);
+
+    border: 3px solid #8bfa6c;
+}
+.exercise-card.noCorrect {
+    background: rgb(244, 221, 221);
+
+    border: 3px solid #fc6767;
 }
 
 .exercise-badge {
