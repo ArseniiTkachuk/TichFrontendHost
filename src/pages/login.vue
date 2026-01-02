@@ -1,7 +1,25 @@
 <template>
   <div class="auth">
     <div class="bg_gradient">
-      <div class="background_reg">
+
+      <!-- MODAL: FORGOT PASSWORD -->
+      <div v-if="isForgot" class="background_reg">
+        <button class="btn-back" @click="isForgot = false">⬅ Назад</button>
+
+        <h2 class="text_reg">Відновлення паролю</h2>
+
+        <div class="description">
+          <p>Введіть email</p>
+        </div>
+
+        <input type="email" v-model="email" placeholder="Email">
+        <p v-if="errors.email" class="error">{{ errors.email }}</p>
+
+        <button class="btn" @click="sendLink">Продовжити</button>
+
+      </div>
+
+      <div v-else class="background_reg">
         <h2 class="text_reg">Login</h2>
 
         <input type="email" v-model="email" placeholder="Email">
@@ -23,15 +41,16 @@
             </svg>
           </span>
         </div>
+        <p @click="isForgot = true" class="forget">Забули пароль?</p>
 
         <p v-if="errors.password" class="error">{{ errors.password }}</p>
         <p v-if="result" class="error">{{ result }}</p>
 
-        <button @click="login">Login</button>
+        <button class="btn" @click="login">Login</button>
 
 
         <!-- Кнопка для переходу на реєстрацію -->
-        <button class="register-btn" @click="$router.push('/register')">Немає акаунту? Зареєструватися</button>
+        <button class=" btn register-btn" @click="$router.push('/register')">Немає акаунту? Зареєструватися</button>
       </div>
     </div>
   </div>
@@ -39,7 +58,7 @@
 
 <script>
 import api from '@/services/api'
-  
+
 
 
 
@@ -50,7 +69,9 @@ export default {
       email: "",
       password: "",
       result: null, // помилка сервера
-      errors: {}    // помилки валідації
+      errors: {},    // помилки валідації
+
+      isForgot: false
     }
   },
 
@@ -66,6 +87,8 @@ export default {
         });
 
         localStorage.setItem("tokenAuthTeacher", res.data.token);
+
+        this.$root.showToast("Ви успішно ввійшли")
 
         this.$router.push('/home');
 
@@ -83,6 +106,26 @@ export default {
           this.result = err.response.data.message;
         }
       }
+    },
+
+    async sendLink() {
+      try {
+
+        const link = window.location.origin + window.location.pathname + "#/reset-password"
+
+        const res = await api.post("/sendLink", {
+          email: this.email,
+          link
+        })
+
+
+        this.$root.showToast("Посилання надіслано")
+
+
+      } catch (err) {
+        console.error(err);
+        this.$root.showToast("Помилка!", "error")
+      }
     }
   }
 }
@@ -97,6 +140,15 @@ export default {
 * {
   box-sizing: border-box;
   font-family: 'Roboto Slab', serif;
+}
+
+
+
+.description p {
+  color: rgb(202, 202, 202);
+  font-size: 20px;
+
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* === wrapper === */
@@ -217,6 +269,20 @@ export default {
   color: #ff00b3;
 }
 
+.forget {
+  margin-top: 6px;
+  padding-right: 5px;
+  font-size: 14px;
+  color: #fff;
+  text-align: right;
+  cursor: pointer;
+}
+
+.forget:hover {
+  text-decoration: underline;
+  color: #ff00b3;
+}
+
 /* === errors (як modal-error) === */
 .error {
   margin-top: 6px;
@@ -226,7 +292,7 @@ export default {
 }
 
 /* === primary button (modal-btn) === */
-.background_reg button {
+.btn {
   width: 100%;
   padding: 12px;
   font-size: 16px;
@@ -244,7 +310,7 @@ export default {
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.background_reg button:hover {
+.btn:hover {
   transform: scale(1.03);
   box-shadow: 0 0 12px rgba(255, 0, 179, 0.6);
 }
@@ -259,6 +325,28 @@ export default {
 .register-btn:hover {
   background: rgba(255, 255, 255, 0.15) !important;
 }
+
+
+.btn-back {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #4d0cff, #b000f8);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(77, 12, 255, 0.3);
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 12, 255, 0.5);
+}
+
 
 /* === mobile === */
 @media (max-width: 480px) {
