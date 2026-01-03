@@ -23,13 +23,27 @@ api.interceptors.response.use(
     const loading = useLoadingStore()
     loading.stop()
 
+    console.log(err.response?.data) // подивитися, що реально приходить від бекенду
+
     if (err.response) {
       const status = err.response.status;
-      const message = err.response?.data?.message || err.message;
+      const data = err.response.data;
 
+      // Масив повідомлень
+      let messages = []
+
+      if (Array.isArray(data)) {
+        messages = data.map(e => e.msg)
+      } else if (data.message) {
+        messages = [data.message]
+      } else {
+        messages = [err.message]
+      }
+
+      // Відповідно до статусу
       switch (status) {
         case 400:
-          showToast(`Помилка: ${message}`, 'error')
+          messages.forEach(msg => showToast(`Помилка: ${msg}`, 'error'))
           break
         case 401:
           showToast('Потрібна авторизація', 'error')
