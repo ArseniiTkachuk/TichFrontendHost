@@ -23,8 +23,6 @@ api.interceptors.response.use(
     const loading = useLoadingStore()
     loading.stop()
 
-    console.log(err.response?.data) // подивитися, що реально приходить від бекенду
-
     if (err.response) {
       const status = err.response.status;
       const data = err.response.data;
